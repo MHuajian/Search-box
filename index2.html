@@ -1,0 +1,257 @@
+<html>
+
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" charset="utf-8" />
+    <title>bing search</title>
+    <style type="text/css">
+    body {
+        background-color: #333;
+    }
+    
+    * {
+        margin: 0;
+        padding: 0
+    }
+    
+    .bg-div {
+        position: relative;
+        background-image: url(./img/river.jpg);
+        width: 1228px;
+        height: 690px;
+        margin: 0 auto;
+        margin-top: 50px;
+    }
+    
+    .logo {
+        background-image: url(./img/logo.png);
+        height: 53px;
+        width: 107px;
+        float: left;
+        margin: -4px 18px 0 0;
+    }
+    
+    .search-form {
+        float: left;
+        background-color: #fff;
+        padding: 5px;
+    }
+    
+    .search-text {
+        height: 25px;
+        line-height: 25px;
+        float: left;
+        width: 350px;
+        border: 0;
+        outline: none;
+    }
+    
+    .search-button {
+        background-image: url(./img/search-button.png);
+        width: 29px;
+        height: 29px;
+        float: left;
+        border: 0
+    }
+    
+    .search-box {
+        position: absolute;
+        top: 150px;
+        left: 200px;
+    }
+    
+    .list {
+        position: absolute;
+        display: none;
+        width: 388px
+    }
+    
+    .list ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        background: #fff;
+        width: 388px;
+        border: 1px solid #999
+    }
+    
+    .list li {
+        padding: 3px;
+        line-height: 25px;
+        font-size: 14px;
+        cursor: pointer
+    }
+    
+    .list li:hover {
+        background: #666;
+        text-decoration: underline
+    }
+    
+    .clearfix {
+        float: left;
+        background: #333;
+        list-style: none;
+        border: 0;
+    }
+    
+    .clearfix li {
+        float: left;
+        color: #999;
+        text-decoration: none;
+        padding: 10px;
+        font-size: 12px;
+        cursor: pointer;
+    }
+    
+    .clearfix li:hover {
+        text-decoration: underline;
+    }
+    
+    .nav {
+        position: absolute;
+        top: 20px;
+        left: 340px;
+    }
+    </style>
+</head>
+
+<body>
+    <div class="nav">
+        <ul class="clearfix">
+            <li> 图片 </li>
+            <li> 视频 </li>
+            <li> 词典 </li>
+            <li> 咨询 </li>
+            <li> 地图 </li>
+            <li> 影响力 </li>
+            <li> 更多 </li>
+        </ul>
+    </div>
+    <div class="bg-div">
+        <div class="search-box" id="search-box">
+            <div class="logo"></div>
+            <form class="search-form" action="https://cn.bing.com/search" target="_blank" id="search-form">
+                <input type="text" class="search-text" name="q" autocomplete="off" id="searc-input" />
+                <input type="submit" class="search-button" value="" />
+            </form>
+        </div>
+    </div>
+    <div class="list" id="list">
+        <ul id="u-list">
+            <li>搜索内容</li>
+            <li>搜索内容</li>
+        </ul>
+    </div>
+    <script type="text/javascript">
+    //封装addLoadEvent函数
+    function addLoadEvent(newf) {
+        var old = window.onload;
+        if (typeof window.onload != "function") {
+            window.onload = newf;
+        } else {
+            window.onload = function() {
+                old();
+                newf();
+            };
+        }
+    }
+//封装ajax函数
+    function ajax(url, fun) {
+        var xmlhttp;
+        if (window.XMLHttpRequest) {
+            xmlhttp = new XMLHttpRequest(); //code for ie7+ fifox safix chrom
+        } else {
+            xmlhttp = new ActiveXObject("Microsoft.XMLHTTP"); //code for ie 6
+        }
+        //异步操作
+        xmlhttp.open("GET", url, true);
+        xmlhttp.send();
+        xmlhttp.onreadystatechange = function() {
+            if (xmlhttp.readyState == 4) {
+                if (xmlhttp.status == 200) {
+                    //用JSON.parse 解析Json字符串换成js对象
+                    fun(JSON.parse(xmlhttp.responseText));
+                }
+            }
+        };
+    }
+//封装getElementById
+    function GetDom(d) {
+        return document.getElementById(d);
+    }
+    //封装DOM事件 有3个参数 事件对象 事件操作 处理函数
+    function addEvent(ele, type, handle) {
+        if (ele.attachEvent) {
+            ele.attachEvent('on' + type, handle);
+        } else if (ele.addEventListener) {
+            ele.addEventListener(type, handle);
+        } else {
+            ele['on' + type] = handle;
+        }
+    }
+//封装距离最后的祖先元素的高度
+    function getElementTop(ele) {
+        var eleT = ele.offsetTop;
+        var current = ele.offsetParent;
+        while (current !== null) {
+            eleT += current.offsetTop;
+           // 返回一个元素离其最近的已经定位的元素
+            current = current.offsetParent;
+        }
+        return eleT;
+    }
+//封装距离最后的祖先元素的左边
+    function getElementLeft(ele) {
+        var eleT = ele.offsetLeft;
+        var current = ele.offsetParent;
+        while (current !== null) {
+            eleT += current.offsetLeft;
+            current = current.offsetParent;
+        }
+        return eleT;
+    }
+//封装事件代理函数  事件代理（js动态生成多个元素）
+    function delegate(target, event, fn) {
+        // var tar_P=document.getElementsByTagName(target)[0].parentNode?document.getElementsByTagName(target)[0].parentNode:document;
+        addEvent(document, event, function(e) {
+            e = e || window.event;
+            if (e.target.nodeName == target.toUpperCase() || e.srcElement.nodeName == target.toUpperCase()) {
+               // a.call(b) 理解a对象的方法应用到b对象上
+                fn.call(e.target);
+            }
+        });
+    }
+
+    function sizelist() {
+        var get_input = GetDom("searc-input");
+        var get_list = GetDom('list');
+        var get_u_list = GetDom("u-list");
+        addEvent(get_input, 'keyup', function(e) {
+            var vla = get_input.value;
+            //获取服务器端的json数据
+            ajax("http://api.bing.com/qsonhs.aspx?q=" + vla, function(d) {
+                var data = d.AS.Results[0].Suggests;
+                var html = ' ';
+                for (var i = 0; i < data.length; i++) {
+                    //动态生成li元素 并获取服务器的json值
+                    html += '<li>' + data[i].Txt + '</li>';
+                }
+                get_u_list.innerHTML = html;
+                get_list.style.top = getElementTop(GetDom('search-form')) + GetDom('search-form').offsetHeight;
+                get_list.style.left = getElementLeft(GetDom('search-form'));
+                get_list.style.display = "block";
+
+            });
+        });
+
+
+    }
+    //为每个li（包括动态生成的）绑定事件
+    delegate('li', 'click', function(e) {
+        var keyword = this.innerHTML;
+        location.href = " http://cn.bing.com/search?q=" + keyword;
+    });
+    addLoadEvent(sizelist);
+    </script>
+</body>
+
+</html>

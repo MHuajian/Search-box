@@ -1,0 +1,177 @@
+<html>
+
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" charset="utf-8" />
+    <title>bing search</title>
+    <style type="text/css">
+    body {
+        background-color: #333;
+    }
+    
+    * {
+        margin: 0;
+        padding: 0
+    }
+    
+    .bg-div {
+        position: relative;
+        background-image: url(./img/river.jpg);
+        width: 1228px;
+        height: 690px;
+        margin: 0 auto;
+        margin-top: 50px;
+    }
+    
+    .logo {
+        background-image: url(./img/logo.png);
+        height: 53px;
+        width: 107px;
+        float: left;
+        margin: -4px 18px 0 0;
+    }
+    
+    .search-form {
+        float: left;
+        background-color: #fff;
+        padding: 5px;
+    }
+    
+    .search-text {
+        height: 25px;
+        line-height: 25px;
+        float: left;
+        width: 350px;
+        border: 0;
+        outline: none;
+    }
+    
+    .search-button {
+        background-image: url(./img/search-button.png);
+        width: 29px;
+        height: 29px;
+        float: left;
+        border: 0
+    }
+    
+    .search-box {
+        position: absolute;
+        top: 150px;
+        left: 200px;
+    }
+    
+    .list {
+        position: absolute;
+        display: none;
+        width: 388px
+    }
+    
+    .list ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        background: #fff;
+        width: 388px;
+        border: 1px solid #999
+    }
+    
+    .list li {
+        padding: 3px;
+        line-height: 25px;
+        font-size: 14px;
+        cursor: pointer
+    }
+    
+    .list li:hover {
+        background: #666;
+        text-decoration: underline
+    }
+    
+    .clearfix {
+        float: left;
+        background: #333;
+        list-style: none;
+        border: 0;
+    }
+    
+    .clearfix li {
+        float: left;
+    }
+    
+    .clearfix li a {
+        color: #999;
+        text-decoration: none;
+        padding: 10px;
+        font-size: 12px;
+    }
+    
+    .clearfix li a:hover {
+        text-decoration: underline;
+    }
+    
+    .nav {
+        position: absolute;
+        top: 20px;
+        left: 340px;
+    }
+    </style>
+</head>
+
+<body>
+    <div class="nav">
+        <ul class="clearfix">
+            <li><a href="#">图片</a></li>
+            <li><a href="#">视频</a></li>
+            <li><a href="#">词典</a></li>
+            <li><a href="#">咨询</a></li>
+            <li><a href="#">地图</a></li>
+            <li><a href="#">影响力</a></li>
+            <li><a href="#">更多</a></li>
+        </ul>
+    </div>
+    <div class="bg-div">
+        <div class="search-box">
+            <div class="logo"></div>
+            <form class="search-form" action="https://cn.bing.com/search" target="_blank">
+                <input type="text" class="search-text" name="q" autocomplete="off" id="searc-input" />
+                <input type="submit" class="search-button" value="" />
+            </form>
+        </div>
+    </div>
+    <div class="list">
+        <ul>
+        </ul>
+    </div>
+    <script type="text/javascript" src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(".search-text").bind('keyup', function(event) {
+        var vla = $("#searc-input").val();
+        //调用ajax 用get方法
+        $.get('http://api.bing.com/qsonhs.aspx?q=' + vla, function(data) {
+            data = data.AS.Results[0].Suggests;
+             var html = ' ';
+            for (var i = 0; i < data.length; i++) {
+                html += '<li>' + data[i].Txt + '</li>';
+            }
+            $(".list>ul").html(html);
+            //使下拉列表与表单对齐
+            $(".list").show().css({
+                top: $(".search-form").offset().top + $(".search-text").outerHeight() + 10,
+                left: $(".search-form").offset().left
+            });
+
+        }, 'json');
+
+    });
+    //在其余地方点击 隐藏下拉列表
+    $(document).bind('click', function() {
+        $(".list").hide();
+    });
+    //绑定鼠标点击事件 使智能提示出来的文字能跳转到相应的url
+    $(document).delegate('li', 'click', function() {
+        var keyword = $(this).text();
+        location.href = "http://cn.bing.com/search?q=" + keyword;
+    });
+    </script>
+</body>
+
+</html>
